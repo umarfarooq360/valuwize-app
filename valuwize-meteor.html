@@ -1,0 +1,155 @@
+<head>
+  <title>valuwize-meteor</title>
+  <!-- CSS Libraries: 
+  	Materialize
+  	FontAwesome 
+  	Material Iconic Fonts-->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.5/css/materialize.min.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/material-design-iconic-font/2.2.0/css/material-design-iconic-font.min.css">
+  <!-- Compiled and minified JavaScript -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.5/js/materialize.min.js"></script>
+
+  
+</head>
+
+<body>
+  <nav>
+    <div class="nav-wrapper teal lighten-2">
+      <a href="#" class="brand-logo">
+      	  <i class="fa fa-line-chart"></i>  Valuwize</a>
+      <ul id="nav-mobile" class="right hide-on-med-and-down">
+        <li><a href="sass.html">Comparable Companies Analysis</a></li>
+        <li><a href="badges.html">Ratio Normalization Analysis</a></li>
+       </ul>
+    </div>
+  </nav>
+	
+  
+</body>
+
+
+
+
+<template name="comparable">
+	<div class="container">
+		<form class="new-stock">
+			<div class="row">
+				<div class="input-field col s12">
+					<i class="fa fa-search prefix"></i>
+					<input required id="search" type="search" name="text" placeholder="Type Stock Ticker" />
+				</div>	
+				<!-- <div class="col s3">
+					<button type="submit" class="waves-effect waves-light btn">Find</button>
+				</div> -->
+			</div>
+		</form>
+		
+		{{#if symbolData}}
+			<div class="row card-panel blue-grey lighten-5">
+				<h5>{{symbolData.name}}, {{symbol}} </h5>
+				<strong>Previous close: {{symbolData.previousClose}} <br> Market Cap: {{symbolData.marketCapitalization}} <br></strong>
+			
+			</div>
+		
+			<table class="striped">
+				 <thead>
+				 	<tr>
+					 	<th>Ticker</th>
+					 	<th>Comparable Companies</th>
+					 	<th>Market Cap</th>
+					 	<th>PE Ratio</th>
+					 	<th>Price to Book</th>
+					 	<th>Price to Sales</th>
+					 	<th> </th>
+				 	</tr>
+				 </thead>
+				 <tbody>
+					{{#each comparablesData}}
+						{{> possibleCompany}}
+					{{/each}}
+					{{> valuationResults}}
+					
+				</tbody>
+			</table>
+		{{/if}}
+
+    </div>
+   
+
+</template>
+
+<template name="possibleCompany">
+	<tr class="collection-item row {{#if selected}}selected{{/if}}">
+		<td><p>{{this.symbol}}</p></td>
+		<td><p><strong>{{this.name}}</strong></p></td>
+		<td>
+			<p>{{this.marketCapitalization}}</p>
+		</td>
+		<td>
+			<p>{{this.peRatio}}</p>
+		</td>
+		<td>
+			<p>{{this.pricePerBook}}</p>
+		</td>
+		<td>
+			<p>{{this.pricePerSales}}</p>
+		</td>
+		<td>
+			<button class="delete btn-floating btn-small waves-effect waves-light red"> &times;</button>
+		</td>	
+	</tr>
+</template>
+
+<template name="valuationResults">
+	<tr>
+		<td></td>
+		<td><strong>Industry Averages:</strong> </td>
+		<td></td>
+		{{#each getAvgTypes}}
+			{{> average }}
+		{{/each}}
+		<td>
+			<button data-target="modaladd" title="Add Comparable" class="add-comparable btn-floating btn-small waves-effect waves-light green modal-trigger" > &plus;</button>
+	  <div id="modaladd" class="modal">
+	    <form class="add-comp">
+	    <div class="modal-content">
+	      <h4>Add Comparable</h4>
+	      
+		      <div class="input-field">
+				<input required id="text" type="search" name="stock" placeholder="Type Stock Ticker" />
+				</div>	
+		    </div>
+		    <div class="modal-footer">
+		      <button type="submit" class="modal-close waves-effect waves-green btn-flat">Add</button>
+		    </div>
+	    </form>
+  	</div>
+  	<script type="text/javascript">
+  	$(document).ready(function () {
+        $('.modal-trigger').leanModal();
+  	});
+
+   </script>
+		</td>
+
+	</tr>
+	<tr>
+		<td></td>
+		<td><strong>Predicted Valuation</strong></td>
+		<td> {{getFinalNumber}}</td>
+	</tr>
+	<tr>
+		<td></td>
+		<td><strong>Current Price</strong></td>
+		<td> {{getCurrentPrice}}</td>
+	</tr>
+	
+</template>
+
+<template name="average">
+	<td>
+		<!-- <strong>{{this}}</strong> -->
+		<p>{{getMean}}</p>
+	</td>
+</template>
