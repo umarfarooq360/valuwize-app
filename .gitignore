@@ -48,3 +48,5 @@ Temporary Items
 
 # Excluding meteor dirs
 .meteor
+data
+.demeteorized

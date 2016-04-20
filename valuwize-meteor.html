@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/material-design-iconic-font/2.2.0/css/material-design-iconic-font.min.css">
   <!-- Compiled and minified JavaScript -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.3/jquery.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.5/js/materialize.min.js"></script>
 
   
@@ -15,12 +16,21 @@
 
 <body>
   <nav>
-    <div class="nav-wrapper teal lighten-2">
-      <a href="#" class="brand-logo">
+    <div class="nav-wrapper our-orange">
+      <a href="/" class="brand-logo">
       	  <i class="fa fa-line-chart"></i>  Valuwize</a>
       <ul id="nav-mobile" class="right hide-on-med-and-down">
-        <li><a href="sass.html">Comparable Companies Analysis</a></li>
-        <li><a href="badges.html">Ratio Normalization Analysis</a></li>
+        {{#if currentUser}}
+		<li><a href="#">{{currentUser.emails}}</a></li>
+        {{/if}}
+        <li><a href="/comps">Comparable Companies Analysis</a></li>
+        <li><a href="/rationorm">Ratio Normalization Analysis</a></li>
+		{{#if currentUser}}
+			<li><a href="/logout">Logout</a></li>
+        {{else}}
+			<li><a href="/login">Login</a></li>
+        {{/if}}
+        
        </ul>
     </div>
   </nav>
@@ -32,6 +42,10 @@
 
 
 <template name="comparable">
+	
+		
+
+
 	<div class="container">
 		<form class="new-stock">
 			<div class="row">
@@ -46,11 +60,11 @@
 		</form>
 		
 		{{#if symbolData}}
-			<div class="row card-panel blue-grey lighten-5">
+			<!-- <div class="row card-panel blue-grey lighten-5">
 				<h5>{{symbolData.name}}, {{symbol}} </h5>
 				<strong>Previous close: {{symbolData.previousClose}} <br> Market Cap: {{symbolData.marketCapitalization}} <br></strong>
 			
-			</div>
+			</div> -->
 		
 			<table class="striped">
 				 <thead>
@@ -58,13 +72,43 @@
 					 	<th>Ticker</th>
 					 	<th>Comparable Companies</th>
 					 	<th>Market Cap</th>
-					 	<th>PE Ratio</th>
-					 	<th>Price to Book</th>
-					 	<th>Price to Sales</th>
+					 	
+					 	<th>
+							
+							<input type="checkbox" id="peRatio" class="toggleAverage" checked/>
+							<label for="peRatio">PE Ratio</label>
+
+					 	</th>
+					 	<th>
+							
+							<input type="checkbox" checked id="pricePerBook" class="toggleAverage"/>
+							<label for="pricePerBook">Price to Book</label>
+					 	</th>
+					 	<th>
+							<input type="checkbox" checked id="pricePerSales" class="toggleAverage"/>
+							<label for="pricePerSales">Price Per Sales</label>
+					 	</th>
 					 	<th> </th>
 				 	</tr>
 				 </thead>
 				 <tbody>
+					<!-- Seperately defining first item -->
+					<tr class="collection-item row amber lighten-4">
+						<td><p>{{symbolData.symbol}}</p></td>
+						<td><p><strong>{{symbolData.name}}</strong></p></td>
+						<td>
+							<p>{{symbolData.marketCapitalization}}</p>
+						</td>
+						<td>
+							<p>{{symbolData.peRatio}}</p>
+						</td>
+						<td>
+							<p>{{symbolData.pricePerBook}}</p>
+						</td>
+						<td>
+							<p>{{symbolData.pricePerSales}}</p>
+						</td>
+					</tr>
 					{{#each comparablesData}}
 						{{> possibleCompany}}
 					{{/each}}
@@ -73,7 +117,6 @@
 				</tbody>
 			</table>
 		{{/if}}
-
     </div>
    
 
@@ -96,13 +139,13 @@
 			<p>{{this.pricePerSales}}</p>
 		</td>
 		<td>
-			<button class="delete btn-floating btn-small waves-effect waves-light red"> &times;</button>
+			<button class="delete btn-floating waves-effect waves-light red"> &times;</button>
 		</td>	
 	</tr>
 </template>
 
 <template name="valuationResults">
-	<tr>
+	<tr class="collection-item row divide">
 		<td></td>
 		<td><strong>Industry Averages:</strong> </td>
 		<td></td>
@@ -110,8 +153,10 @@
 			{{> average }}
 		{{/each}}
 		<td>
-			<button data-target="modaladd" title="Add Comparable" class="add-comparable btn-floating btn-small waves-effect waves-light green modal-trigger" > &plus;</button>
-	  <div id="modaladd" class="modal">
+			<button data-target="modaladd" title="Add Comparable" class="add-comparable btn-floating btn-small waves-effect waves-light green modal-trigger" href="#modaladd"> &plus;</button>
+		</td>
+		<!-- Modal for adding new stock to comparables -->
+	 <div id="modaladd" class="modal">
 	    <form class="add-comp">
 	    <div class="modal-content">
 	      <h4>Add Comparable</h4>
@@ -125,31 +170,353 @@
 		    </div>
 	    </form>
   	</div>
-  	<script type="text/javascript">
-  	$(document).ready(function () {
-        $('.modal-trigger').leanModal();
-  	});
 
-   </script>
-		</td>
+			<!-- Initializing the modal -->
+		  	<script type="javascript">
+		  		$(document).ready(function(){
+		  			console.log("modal Initializing");
+			        $('.modal-trigger').leanModal();
+		  	
+		  		});
+		  		
+
+		   </script>
+	 
+	
 
 	</tr>
-	<tr>
+	<tr class="collection-item row">
 		<td></td>
-		<td><strong>Predicted Valuation</strong></td>
-		<td> {{getFinalNumber}}</td>
+		<td><strong>Per Share Values</strong></td>
+		<td></td>
+		{{#each getAvgTypes}}
+			{{> perShareValues }}
+		{{/each}}
 	</tr>
-	<tr>
+	
+	<tr class="collection-item row">
 		<td></td>
-		<td><strong>Current Price</strong></td>
+		<td><strong>Implied Share Price</strong></td>
+		<td></td>
+		{{#each getAvgTypes}}
+			{{> impliedSharePrice }}
+		{{/each}}
+	</tr>
+
+	<tr class="collection-item row divide">
+		<td></td>
+		<td><p><strong>Predicted Valuation</strong></p></td> <td></td>
+		<td> {{getFinalNumber}}</td><td></td><td></td>
+	</tr>
+	<tr class="collection-item row">
+		<td></td>
+		<td><p><strong>Current Price</strong></p></td><td></td>
 		<td> {{getCurrentPrice}}</td>
+	</tr>
+	<tr class="collection-item row {{#if getUpsideCol}} green {{else}}red {{/if}} lighten-2">
+		<td></td>
+		<td><p><strong>Upside/Downside</strong></p></td><td></td>
+		<td><strong> {{getUpside}} % </strong></td>
 	</tr>
 	
 </template>
 
 <template name="average">
 	<td>
-		<!-- <strong>{{this}}</strong> -->
 		<p>{{getMean}}</p>
 	</td>
+</template>
+
+<template name="perShareValues">
+	<td>
+		<p>{{getPerShareValue}}</p>
+	</td>
+</template>
+
+<template name="impliedSharePrice">
+	<td>
+		<p>{{getImpliedSharePrice}}</p>
+	</td>
+</template>
+
+
+<!-- Templtes for Ratio Normalization go here -->
+
+
+<template name="rationorm">
+	<div class="container">
+		<form class="new-norm">
+			<div class="row">
+				<div class="input-field col s12">
+					<i class="fa fa-search prefix"></i>
+					<input required id="search" type="search" name="text" placeholder="Type Stock Ticker" />
+				</div>	
+				<!-- <div class="col s3">
+					<button type="submit" class="waves-effect waves-light btn">Find</button>
+				</div> -->
+			</div>
+		</form>
+		
+		
+		
+		{{#if displayNow}}
+			<div class="row">
+				
+				<div class="col m6 s12">
+				<h2>{{symbolN}}</h2>	
+				<table class="striped">
+					 <thead>
+					 	<tr>
+						 	<th>Date</th>
+						 	
+						 	<th>
+						 		<input type="checkbox" id="PE" class="toggleAverage" checked/>
+								<label for="PE">Price to Earnings</label>
+							</th>
+						 	<th>
+						 		<input type="checkbox" id="PS" class="toggleAverage" checked/>
+								<label for="PS">Price to Sales</label>
+							</th>
+						 	<th>
+						 		<input type="checkbox" id="PB" class="toggleAverage" checked/>
+								<label for="PB">Price to Book</label>
+							</th>	
+						 	<th>
+								<input type="checkbox" id="PCF" class="toggleAverage" checked/>
+								<label for="PCF">Price to Cash Flow</label>
+						 	</th>
+
+					 	</tr>
+					 </thead>
+					 <tbody>
+						{{#each getDates}}
+							{{> eachDate }}
+						{{/each}}
+						{{> averageRN}}
+						{{> valuationResultsRN}}
+						
+					</tbody>
+				</table>
+				</div>
+		
+				<div class="col m6 s12">
+				<h2>Russell 1000 Index</h2>	
+				<table class="striped">
+					 <thead>
+					 	<tr>
+						 	<th>Date</th>
+						 	<th>Price to Earnings</th>
+						 	<th>Price to Sales</th>
+						 	<th>Price to Book</th>
+						 	<th>Price to Cash Flow</th>
+
+					 	</tr>
+					 </thead>
+					 <tbody>
+						{{#each getDates}}
+							{{> eachDate benchParam}}
+						{{/each}}
+						{{> averageRN benchParam}}
+
+					</tbody>
+				</table>
+				</div>
+		
+			</div>
+		{{/if}}
+
+    </div>
+   
+
+</template>
+
+<template name="eachDate">
+		<tr class="collection-item row">
+			<td>{{getValue}}</td>
+			<td>{{getRatio "PE" }} </td>
+			<td>{{getRatio "PS" }} </td>
+			<td>{{getRatio "PB" }} </td>
+			<td>{{getRatio "PCF" }} </td>
+		</tr>
+	
+</template>
+
+<template name="averageRN">
+	<tr class="collection-item row divide">
+		<td>Average</td>
+		<td>{{getAverage "PE"}} </td>
+		<td>{{getAverage "PS"}} </td>
+		<td>{{getAverage "PB"}} </td>
+		<td>{{getAverage "PCF"}} </td>
+	</tr>
+
+</template>
+
+<template name="valuationResultsRN">
+	<tr class="collection-item row">
+		<td>Ratio to Benchmark</td>
+		<td>{{getRatio "PE"}} </td>
+		<td>{{getRatio "PS"}} </td>
+		<td>{{getRatio "PB"}} </td>
+		<td>{{getRatio "PCF"}} </td>
+	</tr>
+
+	<tr class="collection-item row">
+		<td>Benchmark Current Ratios</td>
+		<td>{{getBenchmarkCurrent "PE"}} </td>
+		<td>{{getBenchmarkCurrent "PS"}} </td>
+		<td>{{getBenchmarkCurrent "PB"}} </td>
+		<td>{{getBenchmarkCurrent "PCF"}} </td>
+	</tr>
+
+	<tr class="collection-item row">
+		<td>Implied Stock Multiple</td>
+		<td>{{getImpliedMultiple "PE"}} </td>
+		<td>{{getImpliedMultiple "PS"}} </td>
+		<td>{{getImpliedMultiple "PB"}} </td>
+		<td>{{getImpliedMultiple "PCF"}} </td>
+	</tr>
+
+	<tr class="collection-item row">
+		<td>Per Share Values</td>
+		<td>{{getPerShareValue "PE"}} </td>
+		<td>{{getPerShareValue "PS"}} </td>
+		<td>{{getPerShareValue "PB"}} </td>
+		<td>{{getPerShareValue "PCF"}} </td>
+	</tr>
+
+	<tr class="collection-item row">
+		<td>Implied Share Price</td>
+		<td>{{getImpliedPrice "PE"}} </td>
+		<td>{{getImpliedPrice "PS"}} </td>
+		<td>{{getImpliedPrice "PB"}} </td>
+		<td>{{getImpliedPrice "PCF"}} </td>
+	</tr>
+
+	<tr class="collection-item row divide">
+		<td><strong>Predicted Share Price</strong></td>
+		<td>{{getAveragePrice }} </td>
+		
+	</tr>
+	<tr class="collection-item row">
+		<td><strong>Current Price</strong></td>
+		<td>{{getCurrentPrice }} </td>
+		
+	</tr>
+	<tr class="collection-item row {{#if getUpsideCol}} green {{else}}red {{/if}}">
+		<td><strong> Overvalued/Undervalued</strong></td>
+		<td>{{getUpside }} % </td>
+		
+	</tr>
+
+
+
+</template>
+
+
+<!-- Home page template goes here -->
+
+<template name="home">
+	
+		<div class="intro lighten-2 z-depth-1 center-align">
+		  <h1 class="black-text text-lighten-4">Valuwize</h1>
+		  <h4 class="white-text text-darken-3">Value Stocks like a Pro!</h4>
+			<br>
+		  <a href='#features' class="waves-effect waves-light btn-large">Try For Free</a><br><br>
+		  <a class="waves-effect waves-light btn-large">Login/Signup</a>
+		  
+		</div>
+
+		<section id="features">
+			<h1 class="center-align heading"> FEATURES</h1>
+			<div class="row container">
+			<div class="col m5 s12 center-align amber lighten-1 feature-card">
+				<h1><i class="fa fa-sitemap" aria-hidden="true"></i><br></h1>
+				<h4>Comparable Companies Analysis</h4>
+				<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ad a iste cum. Nam necessitatibus nostrum numquam, modi quod, nobis non, distinctio ad suscipit minima sit minus totam similique nihil facilis.</p>
+				<br><br>
+				<a href="/comps" class="waves-effect waves-light btn">Try it out!</a><br><br>
+			</div>
+			<div class="col m2"> <br></div>
+			<div class="col m5 s12 center-align amber lighten-1 feature-card">
+				<h1><i class="fa fa-cogs" aria-hidden="true"></i><br></h1>
+				<h4>Ratio Normalization Analysis </h4>
+				<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ad a iste cum. Nam necessitatibus nostrum numquam, modi quod, nobis non, distinctio ad suscipit minima sit minus totam similique nihil facilis.</p>
+				<br><br>
+				<a href="/rationorm" class="waves-effect waves-light btn">Try it out!</a><br><br>
+				</div>
+		</div>
+
+		</section>
+
+		<section id="login">
+			<h1 class="center-align heading"> LOGIN/SIGNUP</h1>
+			<div class="row container">
+			{{> register}}
+			{{> login}}
+
+
+		</div>
+
+
+		</section>
+			
+		
+		
+		<footer class="page-footer orange lighten-1">
+          <div class="container">
+            <div class="row">
+              <div class="col l6 s12">
+                <h5 class="white-text">Valuwize</h5>
+                <p class="grey-text text-lighten-4">You can use rows and columns here to organize your footer content.</p>
+              </div>
+              <div class="col l4 offset-l2 s12">
+                <h5 class="white-text">Links</h5>
+                <ul>
+                  <li><a class="grey-text text-lighten-3" href="#!">Link 1</a></li>
+                  <li><a class="grey-text text-lighten-3" href="#!">Link 2</a></li>
+                  <li><a class="grey-text text-lighten-3" href="#!">Link 3</a></li>
+                  <li><a class="grey-text text-lighten-3" href="#!">Link 4</a></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="footer-copyright">
+            <div class="container">
+            © 2015 Copyright Text
+            <a class="grey-text text-lighten-4 right" href="#!">More Links</a>
+            </div>
+          </div>
+        </footer>
+
+</template>
+
+<template name="register">
+    <div class="container center-align">
+		<h1 class="heading">Register</h1>
+		<div class="input-field">	
+	    <form class="register-form">
+	        <p>Email: <input type="email" id="email"></p>
+	        <p>Password: <input type="password" id="password"></p>
+	         <p><input class="btn waves-effect waves-light" type="submit" value="Register"></p>
+	    </form>
+		</div>
+	</div>
+</template>
+
+<!-- Custom login template -->
+<template name="login">
+	<div class="container center-align">
+		<h1 class="heading">Login</h1>
+		<div class="input-field">
+		 <form class="login-form">
+	        <p>Email: <input type="email" id="email"></p>
+	        <p>Password: <input type="password" id="password"></p>
+	        <p><input class="btn waves-effect waves-light" type="submit" value="Login"></p>
+	        <a href="/register" class="btn waves-effect"> Don't have an account?</a>
+	    </form>
+	    </div>	
+	</div>
+	
+
 </template>

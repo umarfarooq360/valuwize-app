@@ -3,3 +3,74 @@
 .container{ 
 	width: 90% !important;
 }
+
+.collection-item{
+	line-height: 1 !important;
+}
+
+.divide{
+	border-top: solid !important;
+  	border-width: 2px 0;
+  	border-color: #000;
+}
+
+.our-orange{
+	background-color: #f2662f;
+}
+
+td{
+	padding: 5px 5px  !important;
+}
+
+/* Homepage banner CSS */
+.intro
+{
+    padding-top: 15%;
+    padding-bottom: 15%;
+    margin-bottom: 80px;
+    height: 70%;
+    background-image: url('./images/ny2.jpg');
+    background-size: cover;
+    background-repeat: no-repeat; 
+}
+
+.intro h1
+{
+    font-size: 9em;
+    font-weight: 900;
+    text-transform: uppercase;
+
+}
+
+.intro h4
+{
+    font-weight: 900;
+    font-style: bold;
+    
+}
+
+.heading{
+	font-weight: 900;
+    text-transform: uppercase;
+}
+
+/* Feature card is the homepage card that describes the two features of the website */
+.feature-card{
+	padding: 10px 10px;
+
+}
+
+.feature-card{
+	padding: 10px 10px;
+
+}
+
+.feature-card h4{
+	font-weight: 400;
+	font-style: bold;
+	padding-bottom: 20px; 
+}
+
+section{
+	height: 70%;
+}
